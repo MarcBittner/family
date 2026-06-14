@@ -61,7 +61,20 @@ const AREA_MONTAGE = {
   },
   evan:      { open: ["Evan."], captions: [], close: ["Wanted, every single day."] },
   loki:      { open: ["Loki", "—", "forever ours."], captions: [], close: ["Rest easy, sweet boy."] },
-  filou:     { open: ["Filou", "—", "our orange shadow."], captions: [], close: ["Always missed."] },
+  filou: {
+    open: ["Filou", "my orange shadow"],
+    captions: [
+      ["My oldest friend.", "The smartest cat I ever knew —", "and by far the grumpiest."],
+      ["Two surgeries as a kitten saved his life.", "After that, he trusted almost no one."],
+      ["He didn't even trust you for years —", "which made the day he finally did", "mean everything."],
+      ["Fifteen years he was mine.", "The best friend I have ever had."],
+      ["My orange shadow —", "his whole life spent as near to me", "as he could get."],
+      ["When we fought, he'd put himself between us", "and swat at whoever might do harm.", "He guarded this family fiercely."],
+      ["He looked after his brother Loki,", "and came running for us", "every time Loki got himself stuck."],
+      ["He slept on my shoulder almost every night", "for thirteen of his fifteen years."],
+    ],
+    close: ["Last summer he died in my arms,", "after a short illness.", "Loved beyond measure."],
+  },
   maomao:    { open: ["Mao Mao —", "the newest of us."], captions: [], close: ["Welcome home, little one."] },
 };
 function buildAreaSlides(key) {
@@ -71,7 +84,7 @@ function buildAreaSlides(key) {
   const favs = pics.filter(p => p.fav);
   if (favs.length >= 6) pics = favs;                      // prefer keepers once you've starred enough
   const caps = (m.captions || []).slice();
-  const MAX = Math.max(16, caps.length + 2);
+  const MAX = Math.max(18, caps.length * 2 + 2);   // enough photos to space the words out
   if (pics.length > MAX) {
     const stride = pics.length / MAX;
     pics = Array.from({ length: MAX }, (_, i) => pics[Math.floor(i * stride)]);
