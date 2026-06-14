@@ -12,49 +12,50 @@
 </head>
 <body>
 
-<!-- ===== HERO ===== -->
-<header class="hero" id="top">
-  <div class="hero__veil"></div>
-  <div class="hero__inner">
-    <p class="hero__eyebrow">a love letter, in photographs</p>
-    <h1 class="hero__title">To Vivienne,<br />With Love</h1>
-    <p class="hero__sub">Every ordinary day with you was the whole point.</p>
-    <div class="music" id="music">
-      <button class="music__toggle" id="musicToggle" aria-label="Play music">▶</button>
-      <div class="music__meta">
-        <span class="music__label">Now playing</span>
-        <span class="music__track" id="musicTrack">— select a song —</span>
-      </div>
-      <select class="music__select" id="musicSelect" aria-label="Choose song"></select>
-    </div>
-    <p class="hero__scroll">scroll to begin ↓</p>
-  </div>
-</header>
-
-<!-- ===== CURATION BAR ===== -->
-<div class="curate" id="curate">
-  <div class="curate__row">
-    <strong class="curate__brand">Curation studio</strong>
-    <span class="curate__hint">Click a letter to file a photo into an area · click ★ to keep · everything saves automatically</span>
-  </div>
-  <div class="curate__row curate__filters" id="filters"></div>
-  <div class="curate__row curate__actions">
-    <label class="chk"><input type="checkbox" id="onlyFav" /> show only ★ kept</label>
-    <label class="chk"><input type="checkbox" id="onlyUnsorted" /> show only unsorted</label>
-    <span class="spacer"></span>
-    <span class="counts" id="counts"></span>
-    <button class="btn" id="exportBtn">Export my picks</button>
+<!-- ===== ENTER GATE (first tap → starts montage + music) ===== -->
+<div id="enter" class="enter">
+  <div class="enter__inner">
+    <p class="enter__eyebrow">a love letter, in photographs</p>
+    <h1 class="enter__title">To Vivienne,<br/>With Love</h1>
+    <button class="enter__btn" id="enterBtn">♥ &nbsp;begin</button>
+    <p class="enter__hint">press play — with sound</p>
   </div>
 </div>
 
-<!-- ===== GALLERY ===== -->
-<main class="grid" id="grid"></main>
+<!-- ===== CINEMATIC MONTAGE STAGE ===== -->
+<div id="montage" class="montage">
+  <div class="montage__layer" id="mlayerA"></div>
+  <div class="montage__layer" id="mlayerB"></div>
+  <div class="montage__vignette"></div>
+  <div class="montage__text" id="mtext"></div>
+  <button class="montage__skip" id="mskip">skip ↓</button>
+</div>
 
-<!-- ===== EXPORT MODAL ===== -->
+<!-- ===== NAV ===== -->
+<nav class="nav" id="nav">
+  <a href="#montage" class="nav__brand">To&nbsp;Vivienne</a>
+  <button class="nav__burger" id="burger" aria-label="menu">☰</button>
+  <div class="nav__links" id="navLinks">
+    <a href="#montage" data-route="montage">Montage</a>
+    <a href="#vivienne" data-route="vivienne">Vivienne</a>
+    <a href="#augustine" data-route="augustine">Augustine</a>
+    <a href="#evan" data-route="evan">Evan</a>
+    <a href="#loki" data-route="loki">Loki</a>
+    <a href="#filou" data-route="filou">Filou</a>
+    <a href="#maomao" data-route="maomao">Mao&nbsp;Mao</a>
+    <a href="#gallery" data-route="gallery" class="nav__gallery">Gallery</a>
+    <button class="nav__music" id="musicToggle" title="music">♪</button>
+  </div>
+</nav>
+
+<!-- ===== ROUTED VIEW ===== -->
+<main id="view" class="view"></main>
+
+<!-- ===== EXPORT MODAL (gallery) ===== -->
 <div class="modal" id="modal" hidden>
   <div class="modal__box">
     <h3>Your picks</h3>
-    <p class="modal__note">Copied to your clipboard. Paste this back to me and I'll pull every kept photo at full resolution and build each area.</p>
+    <p class="modal__note">Copied to your clipboard. Paste this back to me and I'll pull every kept photo at full resolution and finish each area + its montage.</p>
     <textarea id="exportText" readonly></textarea>
     <div class="modal__actions">
       <button class="btn" id="copyBtn">Copy again</button>
@@ -63,11 +64,9 @@
   </div>
 </div>
 
-<footer class="foot">
-  <p>Made with love · sober, present, and not going anywhere.</p>
-</footer>
-
 <script src="data.js"></script>
+<script src="js/music.js"></script>
+<script src="js/montage.js"></script>
 <script src="js/app.js"></script>
 </body>
 </html>
