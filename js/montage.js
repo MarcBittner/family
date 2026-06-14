@@ -4,16 +4,18 @@
 
 const SLIDES = [
   { img: "download.jpeg",            lines: ["To Vivienne,", "With Love"], big: true },
-  { img: "montage/thumbs/0065.jpg",  lines: ["It began quietly —", "you, me, and two cats", "sure the place was theirs."] },
-  { img: "montage/thumbs/0174.jpg",  lines: ["I didn't know then", "these were the best days", "of my life."] },
-  { img: "montage/thumbs/0226.jpg",  lines: ["We went looking for the world,", "and found it in each other."] },
-  { img: "montage/thumbs/0252.jpg",  lines: ["We made a home.", "None of it was loud.", "All of it was everything."] },
-  { img: "montage/thumbs/0547.jpg",  lines: ["The day Augustine arrived,", "I watched you become a mother —", "and loved you more than ever."] },
-  { img: "montage/thumbs/0610.jpg",  lines: ["A family.", "The thing I want most", "in this world."] },
-  { img: "montage/thumbs/0488.jpg",  lines: ["You loved them like family —", "Loki, especially —", "because that's what they were."] },
-  { img: "montage/thumbs/0780.jpg",  lines: ["Every ordinary day with you", "was the whole point."] },
-  { img: "montage/thumbs/0743.jpg",  lines: ["Sober now. Clear now.", "And what I see is you."] },
-  { img: "download.jpeg",            lines: ["Come home.", "I'm here.", "I'm not going anywhere."], big: true },
+  { img: "montage/thumbs/0065.jpg",  lines: ["Before everything,", "there was us."] },
+  { img: "montage/thumbs/0089.jpg",  lines: ["Two people who found home", "in each other."] },
+  { img: "montage/thumbs/0174.jpg",  lines: ["I didn't know then", "these were the best days of my life.", "I know it now."] },
+  { img: "montage/thumbs/0226.jpg",  lines: ["We went looking for the world,", "and kept finding you."] },
+  { img: "montage/thumbs/0252.jpg",  lines: ["We built a life.", "Quiet mornings.", "Your hand in mine."] },
+  { img: "montage/thumbs/0488.jpg",  lines: ["You loved them like family —", "Loki most of all —", "because that's what they were."] },
+  { img: "montage/thumbs/0547.jpg",  lines: ["Then Augustine.", "I watched you become a mother,", "and loved you more than I knew I could."] },
+  { img: "montage/thumbs/0610.jpg",  lines: ["A family —", "the thing I want most", "in this world."] },
+  { img: "montage/thumbs/0780.jpg",  lines: ["Every ordinary day with you two", "was the whole point."] },
+  { img: "montage/thumbs/0743.jpg",  lines: ["I lost my way for a while.", "I won't hide from that,", "or ask you to carry it."] },
+  { img: "download.jpeg",            lines: ["I'm sober now. Clear now.", "And what I see is you,", "Auggie, and Evan."] },
+  { img: "download.jpeg",            lines: ["Come home.", "Let me show you — every ordinary day —", "the man I'm becoming.", "I'm not going anywhere."], big: true },
 ];
 
 const SLIDE_MS = 6000;
