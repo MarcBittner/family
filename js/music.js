@@ -1,119 +1,114 @@
-/* ===== Music ===== *
- * Plays real MP3s from assets/music/ if present; otherwise synthesizes a soft
- * ambient bed with the Web Audio API so there's always sound. One module, used
- * by the montage and the nav toggle.                                           */
+/* ===== Music — streams the real songs via the YouTube IFrame API ===== *
+ * Tracks (in order):
+ *   1. My Body Is a Cage — Peter Gabriel
+ *   2. A Thousand Years   — Christina Perri
+ *   3. My Immortal        — Evanescence
+ * Plays the actual recordings from YouTube (no files to host). A tiny synth
+ * bed is kept only as a last-ditch fallback if YouTube can't embed at all.   */
 (function () {
-  const FILES = [
-    "assets/music/my-body-is-a-cage.mp3",
-    "assets/music/a-thousand-years.mp3",
-    "assets/music/my-immortal.mp3",
+  const TRACKS = [
+    { id: "bJwiLFhVlCM", title: "My Body Is a Cage — Peter Gabriel" },
+    { id: "rtOvBOTyX00", title: "A Thousand Years — Christina Perri" },
+    { id: "5anLPw0Efmo", title: "My Immortal — Evanescence" },
   ];
+  const VOL = 65;
 
-  let mode = null;          // 'file' | 'synth'
-  let playing = false;
-  let targetVol = 0.85;
+  let yt = null, ytReady = false, playing = false, pending = false, idx = 0, errs = 0, usingSynth = false;
 
-  /* ---- file mode ---- */
-  const audio = new Audio();
-  audio.loop = false;
-  let trackIdx = 0;
-  audio.addEventListener("ended", () => { trackIdx = (trackIdx + 1) % FILES.length; audio.src = FILES[trackIdx]; audio.play().catch(()=>{}); });
+  /* ---- inject YouTube IFrame API + hidden player host ---- */
+  const host = document.createElement("div");
+  host.id = "ytplayer";
+  host.style.cssText = "position:fixed;left:-9999px;top:-9999px;width:1px;height:1px;opacity:0;pointer-events:none";
+  document.addEventListener("DOMContentLoaded", () => document.body.appendChild(host));
+  if (document.body) document.body.appendChild(host);
+  const tag = document.createElement("script");
+  tag.src = "https://www.youtube.com/iframe_api";
+  document.head.appendChild(tag);
 
-  let haveFiles = false;
-  // probe first file (HEAD); browsers may not allow HEAD on static, so fall back to load test
-  fetch(FILES[0], { method: "HEAD" }).then(r => { haveFiles = r.ok; }).catch(() => { haveFiles = false; });
-
-  /* ---- synth mode (ambient pad) ---- */
-  let ctx, master, voices = [], chordTimer;
-  // A minor-ish, slow and tender:  Am  F  C  G   (root, third, fifth — low octave)
-  const CHORDS = [
-    [110.00, 130.81, 164.81],   // Am  (A2 C3 E3)
-    [ 87.31, 110.00, 130.81],   // F   (F2 A2 C3)
-    [ 98.00, 130.81, 164.81],   // C/G (G2 C3 E3)
-    [ 98.00, 123.47, 146.83],   // G   (G2 B2 D3)
-  ];
-  let chordIdx = 0;
-
-  function buildSynth() {
-    ctx = new (window.AudioContext || window.webkitAudioContext)();
-    master = ctx.createGain();
-    master.gain.value = 0;
-    // gentle space: feedback delay
-    const delay = ctx.createDelay(); delay.delayTime.value = 0.38;
-    const fb = ctx.createGain(); fb.gain.value = 0.32;
-    const wet = ctx.createGain(); wet.gain.value = 0.25;
-    delay.connect(fb); fb.connect(delay); delay.connect(wet); wet.connect(ctx.destination);
-    master.connect(ctx.destination); master.connect(delay);
-    // soft low-pass over everything
-    const lp = ctx.createBiquadFilter(); lp.type = "lowpass"; lp.frequency.value = 1100; lp.Q.value = 0.6;
-    lp.connect(master);
-    // 3 detuned voices
-    voices = CHORDS[0].map((f) => {
-      const o1 = ctx.createOscillator(); o1.type = "sine";     o1.frequency.value = f;
-      const o2 = ctx.createOscillator(); o2.type = "triangle"; o2.frequency.value = f; o2.detune.value = 6;
-      const g = ctx.createGain(); g.gain.value = 0.16;
-      o1.connect(g); o2.connect(g); g.connect(lp);
-      o1.start(); o2.start();
-      return { o1, o2, g };
+  window.onYouTubeIframeAPIReady = function () {
+    yt = new YT.Player("ytplayer", {
+      height: "1", width: "1",
+      playerVars: { playsinline: 1, controls: 0, disablekb: 1 },
+      events: {
+        onReady: () => { ytReady = true; yt.setVolume(VOL); if (pending) { pending = false; startYT(); } },
+        onError: () => skipBroken(),
+        onStateChange: (e) => { if (e.data === YT.PlayerState.ENDED) next(); },
+      },
     });
-    // slow shimmer LFO on filter
-    const lfo = ctx.createOscillator(); lfo.frequency.value = 0.05;
-    const lfoGain = ctx.createGain(); lfoGain.gain.value = 350;
-    lfo.connect(lfoGain); lfoGain.connect(lp.frequency); lfo.start();
-    scheduleChords();
-  }
-  function scheduleChords() {
-    chordTimer = setInterval(() => {
-      chordIdx = (chordIdx + 1) % CHORDS.length;
-      const c = CHORDS[chordIdx];
-      voices.forEach((v, i) => {
-        const t = ctx.currentTime;
-        v.o1.frequency.setTargetAtTime(c[i], t, 1.2);
-        v.o2.frequency.setTargetAtTime(c[i], t, 1.2);
-      });
-    }, 8000);
-  }
+  };
 
-  function rampMaster(to, secs = 2.2) {
-    if (!ctx) return;
-    master.gain.setTargetAtTime(to, ctx.currentTime, secs / 3);
+  function startYT() {
+    try {
+      usingSynth = false; stopSynth();
+      yt.loadVideoById(TRACKS[idx].id);
+      yt.setVolume(0); yt.playVideo();
+      fadeYT(VOL);
+      label(); updateBtn();
+    } catch (_) { synthStart(); }
+  }
+  function fadeYT(to) {
+    let v = 0; const t = setInterval(() => { v = Math.min(to, v + 4); try { yt.setVolume(v); } catch (_) {} if (v >= to) clearInterval(t); }, 120);
+  }
+  function next() { idx = (idx + 1) % TRACKS.length; errs = 0; if (playing && ytReady) startYT(); }
+  function skipBroken() {            // a video can't embed → try the next; if all fail → synth
+    errs++;
+    if (errs >= TRACKS.length) { synthStart(); return; }
+    idx = (idx + 1) % TRACKS.length;
+    if (playing) startYT();
   }
 
   /* ---- public API ---- */
   function play() {
-    if (playing) return;
-    playing = true;
-    if (haveFiles) {
-      mode = "file";
-      if (!audio.src) audio.src = FILES[trackIdx];
-      audio.volume = 0;
-      audio.play().then(() => fadeFile(targetVol)).catch(() => { mode = "synth"; ensureSynth(); });
-    } else {
-      mode = "synth"; ensureSynth();
-    }
+    if (playing) return; playing = true;
+    if (ytReady) startYT(); else { pending = true; }   // will start the instant the API is ready
     updateBtn();
-  }
-  function ensureSynth() {
-    if (!ctx) buildSynth(); else if (ctx.state === "suspended") ctx.resume();
-    rampMaster(targetVol);
-  }
-  function fadeFile(to) {
-    let v = audio.volume;
-    const id = setInterval(() => { v = Math.min(to, v + 0.04); audio.volume = v; if (v >= to) clearInterval(id); }, 110);
   }
   function pause() {
     playing = false;
-    if (mode === "file") audio.pause();
-    if (mode === "synth") rampMaster(0);
+    try { yt && yt.pauseVideo(); } catch (_) {}
+    if (usingSynth) stopSynth();
     updateBtn();
   }
   function toggle() { playing ? pause() : play(); }
-  function setVolume(v) { targetVol = v; if (mode === "file") audio.volume = v; if (mode === "synth") rampMaster(v); }
+  function setVolume(v) { try { yt && yt.setVolume(Math.round(v)); } catch (_) {} synthVol(v / 100); }
+  function selectTrack(i) { idx = i % TRACKS.length; if (playing) startYT(); }
 
+  function label() {
+    const el = document.getElementById("musicTrack");
+    if (el) el.textContent = TRACKS[idx].title;
+  }
   function updateBtn() {
     const b = document.getElementById("musicToggle");
-    if (b) { b.classList.toggle("on", playing); b.textContent = playing ? "♪" : "♪"; }
+    if (b) { b.classList.toggle("on", playing); }
   }
 
-  window.Music = { play, pause, toggle, setVolume, get playing() { return playing; }, get usingFiles() { return haveFiles; } };
+  /* ================= synth fallback (only if YouTube is fully blocked) ================= */
+  let ctx, master, voices = [], chordTimer, chordIdx = 0;
+  const CHORDS = [[110, 130.81, 164.81], [87.31, 110, 130.81], [98, 130.81, 164.81], [98, 123.47, 146.83]];
+  function synthStart() {
+    usingSynth = true;
+    if (!ctx) buildSynth(); else if (ctx.state === "suspended") ctx.resume();
+    master && master.gain.setTargetAtTime(0.8, ctx.currentTime, 0.8);
+    const el = document.getElementById("musicTrack"); if (el) el.textContent = "(ambient — YouTube blocked embedding)";
+  }
+  function stopSynth() { if (ctx && master) master.gain.setTargetAtTime(0, ctx.currentTime, 0.4); }
+  function synthVol(v) { if (ctx && master && usingSynth) master.gain.setTargetAtTime(v, ctx.currentTime, 0.5); }
+  function buildSynth() {
+    ctx = new (window.AudioContext || window.webkitAudioContext)();
+    master = ctx.createGain(); master.gain.value = 0;
+    const lp = ctx.createBiquadFilter(); lp.type = "lowpass"; lp.frequency.value = 1100;
+    lp.connect(master); master.connect(ctx.destination);
+    voices = CHORDS[0].map((f) => {
+      const o1 = ctx.createOscillator(); o1.type = "sine"; o1.frequency.value = f;
+      const o2 = ctx.createOscillator(); o2.type = "triangle"; o2.frequency.value = f; o2.detune.value = 6;
+      const g = ctx.createGain(); g.gain.value = 0.16; o1.connect(g); o2.connect(g); g.connect(lp);
+      o1.start(); o2.start(); return { o1, o2 };
+    });
+    chordTimer = setInterval(() => {
+      chordIdx = (chordIdx + 1) % CHORDS.length; const c = CHORDS[chordIdx];
+      voices.forEach((v, i) => { v.o1.frequency.setTargetAtTime(c[i], ctx.currentTime, 1.2); v.o2.frequency.setTargetAtTime(c[i], ctx.currentTime, 1.2); });
+    }, 8000);
+  }
+
+  window.Music = { play, pause, toggle, setVolume, selectTrack, TRACKS, get playing() { return playing; } };
 })();
