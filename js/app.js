@@ -43,29 +43,45 @@ function cardHTML(p) {
 /* ---------- views ---------- */
 const VIEW = document.getElementById("view");
 
-/* per-section montage words — REPLACE freely (Marc's words for Loki/Filou/Boo go here) */
+/* per-section montage words — { open, captions[], close }. Captions unfold across the photos. */
 const AREA_MONTAGE = {
-  vivienne:  { open: ["For Vivienne"],                 close: ["Whatever comes,", "I'm not going anywhere."] },
-  augustine: { open: ["Augustine —", "our Boo."],      close: ["You are so loved, Auggie."] },
-  evan:      { open: ["Evan."],                        close: ["Wanted, every single day."] },
-  loki:      { open: ["Loki", "—", "forever ours."],   close: ["Rest easy, sweet boy."] },
-  filou:     { open: ["Filou", "—", "our orange shadow."], close: ["Always missed."] },
-  maomao:    { open: ["Mao Mao —", "the newest of us."], close: ["Welcome home, little one."] },
+  vivienne:  { open: ["For Vivienne"], captions: [], close: ["Whatever comes,", "I'm not going anywhere."] },
+  augustine: {
+    open: ["Augustine Che Bittner", "our Boo"],
+    captions: [
+      ["Our first son.", "The one who made us a family."],
+      ["He almost left us once —", "a sunflower seed, a frightening day in China.", "We have never forgotten how close it was."],
+      ["So every ordinary day with him", "feels like a gift we were handed twice."],
+      ["He doesn't have many words yet.", "He has his own way of being here —", "careful, particular, entirely himself."],
+      ["He climbs to the highest thing he can find", "and jumps. Fearless. Again and again."],
+      ["Loves animals. Loves the iPad too much.", "Eats exactly what he wants, and nothing else."],
+      ["A tiny version of me —", "same face, same wiring —", "and I love every bit of it."],
+    ],
+    close: ["Augustine.", "Precious beyond all of it.", "Ours."],
+  },
+  evan:      { open: ["Evan."], captions: [], close: ["Wanted, every single day."] },
+  loki:      { open: ["Loki", "—", "forever ours."], captions: [], close: ["Rest easy, sweet boy."] },
+  filou:     { open: ["Filou", "—", "our orange shadow."], captions: [], close: ["Always missed."] },
+  maomao:    { open: ["Mao Mao —", "the newest of us."], captions: [], close: ["Welcome home, little one."] },
 };
 function buildAreaSlides(key) {
-  const m = AREA_MONTAGE[key] || { open: [AREA_BY_KEY[key].label], close: [] };
+  const m = AREA_MONTAGE[key] || { open: [AREA_BY_KEY[key].label], captions: [], close: [] };
   let pics = photos.filter(p => p.area === key);
   if (!pics.length) return null;
   const favs = pics.filter(p => p.fav);
-  if (favs.length >= 6) pics = favs;            // prefer keepers if you've starred enough
-  const MAX = 16;
-  if (pics.length > MAX) {                       // sample evenly across the set, keep order
+  if (favs.length >= 6) pics = favs;                      // prefer keepers once you've starred enough
+  const caps = (m.captions || []).slice();
+  const MAX = Math.max(16, caps.length + 2);
+  if (pics.length > MAX) {
     const stride = pics.length / MAX;
     pics = Array.from({ length: MAX }, (_, i) => pics[Math.floor(i * stride)]);
   }
+  const n = pics.length;
+  const gap = caps.length ? Math.max(1, Math.floor(n / (caps.length + 1))) : n + 1;
   const slides = [{ img: pics[0].src, lines: m.open, big: true }];
-  pics.forEach(p => slides.push({ img: p.src, lines: [] }));
-  slides.push({ img: pics[pics.length - 1].src, lines: m.close, big: true });
+  pics.forEach((p, i) => slides.push({ img: p.src, lines: (caps.length && i > 0 && i % gap === 0) ? caps.shift() : [] }));
+  while (caps.length) slides.push({ img: pics[n - 1].src, lines: caps.shift() });
+  slides.push({ img: pics[n - 1].src, lines: m.close, big: true });
   return slides;
 }
 
