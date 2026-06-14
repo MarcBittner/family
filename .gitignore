@@ -1,0 +1,14 @@
+# Claude Code untracked files (credentials, session transcripts)
+docs/spec/untracked/
+
+# Curation intermediates (not needed for the site; thumbs ARE kept)
+montage/labeled/
+montage/lsheets/
+montage/sheets/
+montage/full/
+montage/*.png
+montage/*.jsonl
+.DS_Store
+
+# Full-res yearbook originals (thumbs are committed; originals stay local)
+Auggie year book/

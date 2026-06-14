@@ -1,0 +1,7 @@
+services:
+  - type: web
+    name: to-vivienne
+    runtime: static
+    buildCommand: "true"
+    staticPublishPath: .
+    pullRequestPreviewsEnabled: false
