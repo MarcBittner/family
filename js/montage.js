@@ -15,8 +15,11 @@ const SLIDES = [
   { img: "montage/thumbs/0780.jpg",  lines: ["Every ordinary day with you two", "was the whole point."] },
   { img: "montage/thumbs/0743.jpg",  lines: ["I lost my way for a while.", "I won't hide from that,", "or ask you to carry it."] },
   { img: "download.jpeg",            lines: ["I'm sober now. Clear now.", "And what I see is you,", "Auggie, and Evan."] },
-  { img: "download.jpeg",            lines: ["Come home.", "Let me show you — every ordinary day —", "the man I'm becoming.", "I'm not going anywhere."], big: true },
+  { img: "download.jpeg",            lines: ["Whatever comes,", "I'm not going anywhere."], big: true },
 ];
+
+/* per-section montages get their slides passed in; default is the love story above */
+let slides = SLIDES;
 
 const SLIDE_MS = 6000;
 
@@ -43,16 +46,17 @@ function showText(slide) {
   setTimeout(() => textEl.classList.add("show"), 350);
 }
 function step() {
-  const slide = SLIDES[idx];
+  const slide = slides[idx];
   paint(slide, back);
   back.style.opacity = 1; front.style.opacity = 0;
   [front, back] = [back, front];
   showText(slide);
   idx++;
-  timer = setTimeout(idx >= SLIDES.length ? end : step, SLIDE_MS);
+  timer = setTimeout(idx >= slides.length ? end : step, SLIDE_MS);
 }
-function play() {
+function play(custom) {
   if (running) return;
+  slides = (custom && custom.length) ? custom : SLIDES;
   running = true;
   enterEl.classList.add("gone");
   stage.classList.add("playing");

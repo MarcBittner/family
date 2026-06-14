@@ -43,6 +43,32 @@ function cardHTML(p) {
 /* ---------- views ---------- */
 const VIEW = document.getElementById("view");
 
+/* per-section montage words — REPLACE freely (Marc's words for Loki/Filou/Boo go here) */
+const AREA_MONTAGE = {
+  vivienne:  { open: ["For Vivienne"],                 close: ["Whatever comes,", "I'm not going anywhere."] },
+  augustine: { open: ["Augustine —", "our Boo."],      close: ["You are so loved, Auggie."] },
+  evan:      { open: ["Evan."],                        close: ["Wanted, every single day."] },
+  loki:      { open: ["Loki", "—", "forever ours."],   close: ["Rest easy, sweet boy."] },
+  filou:     { open: ["Filou", "—", "our orange shadow."], close: ["Always missed."] },
+  maomao:    { open: ["Mao Mao —", "the newest of us."], close: ["Welcome home, little one."] },
+};
+function buildAreaSlides(key) {
+  const m = AREA_MONTAGE[key] || { open: [AREA_BY_KEY[key].label], close: [] };
+  let pics = photos.filter(p => p.area === key);
+  if (!pics.length) return null;
+  const favs = pics.filter(p => p.fav);
+  if (favs.length >= 6) pics = favs;            // prefer keepers if you've starred enough
+  const MAX = 16;
+  if (pics.length > MAX) {                       // sample evenly across the set, keep order
+    const stride = pics.length / MAX;
+    pics = Array.from({ length: MAX }, (_, i) => pics[Math.floor(i * stride)]);
+  }
+  const slides = [{ img: pics[0].src, lines: m.open, big: true }];
+  pics.forEach(p => slides.push({ img: p.src, lines: [] }));
+  slides.push({ img: pics[pics.length - 1].src, lines: m.close, big: true });
+  return slides;
+}
+
 function renderSection(key) {
   const a = AREA_BY_KEY[key];
   const list = photos.filter(p => p.area === key);
@@ -52,6 +78,7 @@ function renderSection(key) {
         <h2 class="section__title">${a.label}</h2>
         <p class="section__tag">${a.tag}</p>
         <p class="section__count">${list.length} photo${list.length === 1 ? "" : "s"}</p>
+        ${list.length ? `<button class="btn montage-cta" id="playSection">▶ Play ${a.label}'s montage</button>` : ""}
       </header>
       ${list.length
         ? `<div class="grid">${list.map(cardHTML).join("")}</div>`
@@ -60,6 +87,8 @@ function renderSection(key) {
              <p>Open the <a href="#gallery">Gallery</a> and tap <b>${a.letter}</b> on the photos that belong here — they'll appear in this section.</p>
            </div>`}
     </section>`;
+  const ps = document.getElementById("playSection");
+  if (ps) ps.onclick = () => window.Montage.play(buildAreaSlides(key));
 }
 
 let filterArea = "all", onlyFav = false, onlyUnsorted = false;
