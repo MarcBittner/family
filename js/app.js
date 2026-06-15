@@ -248,10 +248,9 @@ VIEW.addEventListener("click", e => {
 
 /* ---------- lightbox ---------- */
 function openLightbox(p) {
-  const src = p.full ? p.full : p.src;
   const lb = document.createElement("div");
   lb.className = "lightbox";
-  lb.innerHTML = `<img src="${src}" alt="${p.id}" /><span class="lightbox__id">${p.id}</span>`;
+  lb.innerHTML = `<img src="${p.src}" alt="${p.id}" /><span class="lightbox__id">${p.id}</span>`;
   lb.onclick = () => lb.remove();
   document.body.appendChild(lb);
 }
