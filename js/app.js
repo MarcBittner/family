@@ -20,11 +20,11 @@ const AREAS = [
 const AREA_BY_KEY = Object.fromEntries(AREAS.map(a => [a.key, a]));
 const STORE_KEY = "vivienne_curation_v1";
 
-const saved = JSON.parse(localStorage.getItem(STORE_KEY) || "{}");
+// The deployed data.js is the single source of truth (no stale localStorage override).
 const photos = window.PHOTOS.map(p => ({
   ...p,
-  area: saved[p.id]?.area ?? p.area ?? "",
-  fav:  saved[p.id]?.fav  ?? p.fav  ?? false,
+  area: p.area ?? "",
+  fav:  p.fav ?? false,
 }));
 const byId = Object.fromEntries(photos.map(p => [p.id, p]));
 function persist() {
