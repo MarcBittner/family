@@ -12,3 +12,8 @@ montage/*.jsonl
 
 # Full-res yearbook originals (thumbs are committed; originals stay local)
 Auggie year book/
+
+# Messenger photo dumps in root (copied into montage/new/)
+/*-*-*-*-*.jpeg
+/*_n.jpg
+montage/new_lab/
