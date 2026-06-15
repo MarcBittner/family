@@ -57,8 +57,8 @@ const AREA_MONTAGE = {
       ["He doesn't have many words yet.", "He has his own way of being here —", "careful, particular, entirely himself."],
       ["He climbs to the highest thing he can find", "and jumps. Fearless. Again and again."],
       ["Loves animals. Loves the iPad too much.", "Eats exactly what he wants, and nothing else."],
-      ["A tiny version of me —", "same face, same wiring —", "and I love every bit of it."],
     ],
+    pins: { "p0562": ["A tiny version of me —", "same face, same wiring —", "and I love every bit of it."] },
     close: ["Augustine.", "Precious beyond all of it.", "Ours."],
     songs: [{ title: "Hallelujah — Pentatonix", ids: ["LRP8d7hhpoQ", "9UyYjXVnQTE"] }],
   },
@@ -115,30 +115,42 @@ const AREA_MONTAGE = {
     ],
   },
 };
+function areaPhotos(key) {
+  // Marc appears in the couple shots (tagged vivienne), so his section draws from both.
+  if (key === "marc") return photos.filter(p => p.area === "marc" || p.area === "vivienne");
+  return photos.filter(p => p.area === key);
+}
 function buildAreaSlides(key) {
   const m = AREA_MONTAGE[key] || { open: [AREA_BY_KEY[key].label], captions: [], close: [] };
-  let pics = photos.filter(p => p.area === key && !p.hidden);   // montages use the keepers only
+  let pics = areaPhotos(key).filter(p => !p.hidden && p.kind !== "video");   // keepers only, no video stills
   if (!pics.length) return null;
   const favs = pics.filter(p => p.fav);
   if (favs.length >= 6) pics = favs;                      // prefer keepers once you've starred enough
   const caps = (m.captions || []).slice();
-  const MAX = Math.max(18, caps.length * 2 + 2);   // enough photos to space the words out
+  const pins = m.pins || {};                              // photoId -> caption pinned to that exact photo
+  const MAX = Math.max(36, caps.length * 3 + 2);
   if (pics.length > MAX) {
     const stride = pics.length / MAX;
     pics = Array.from({ length: MAX }, (_, i) => pics[Math.floor(i * stride)]);
   }
+  Object.keys(pins).forEach(id => {                       // ensure pinned photos appear
+    if (!pics.some(p => p.id === id)) { const pp = photos.find(p => p.id === id); if (pp) pics.splice(Math.floor(pics.length / 2), 0, pp); }
+  });
   const n = pics.length;
   const gap = caps.length ? Math.max(1, Math.floor(n / (caps.length + 1))) : n + 1;
   const slides = [{ img: pics[0].src, lines: m.open, big: true }];
-  pics.forEach((p, i) => slides.push({ img: p.src, lines: (caps.length && i > 0 && i % gap === 0) ? caps.shift() : [] }));
+  pics.forEach((p, i) => {
+    const lines = pins[p.id] ? pins[p.id] : ((caps.length && i > 0 && i % gap === 0) ? caps.shift() : []);
+    slides.push({ img: p.src, lines });
+  });
   while (caps.length) slides.push({ img: pics[n - 1].src, lines: caps.shift() });
-  slides.push({ img: pics[n - 1].src, lines: m.close, big: true });
+  slides.push({ img: pics[pics.length - 1].src, lines: m.close, big: true });
   return slides;
 }
 
 function renderSection(key) {
   const a = AREA_BY_KEY[key];
-  const all = photos.filter(p => p.area === key);
+  const all = areaPhotos(key);
   const hiddenN = all.filter(p => p.hidden).length;
   const list = all.filter(p => showHidden || !p.hidden);
   VIEW.innerHTML = `
