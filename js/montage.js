@@ -70,6 +70,7 @@ function play(custom, songs) {
   stage.classList.add("playing");
   document.body.classList.remove("montage-done");
   if (window.Music) window.Music.playList(songs);   // always switch to the right playlist (default if none)
+  slides.forEach(s => { const im = new Image(); im.src = s.img; });   // preload all images in the background
   idx = 0; front = layerA; back = layerB; step();
 }
 function end() {
