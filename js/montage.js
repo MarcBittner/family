@@ -91,7 +91,7 @@ function stop() {         // leave the montage without showing the gate (navigat
   stage.classList.remove("playing", "done");
 }
 
-document.getElementById("enterBtn").addEventListener("click", play);
+document.getElementById("enterBtn").addEventListener("click", () => play(null, window.MAIN_SONGS));
 skipEl.addEventListener("click", e => { e.stopPropagation(); end(); });
 document.addEventListener("keydown", e => { if (!running && !enterEl.classList.contains("gone") && (e.key === "Enter" || e.key === " ")) play(); });
 

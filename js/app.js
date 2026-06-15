@@ -1,12 +1,12 @@
 /* ===== To Vivienne, With Love — nav router + sections + curation ===== */
 const AREAS = [
-  { key: "vivienne",  label: "Vivienne",  letter: "V", color: "#c98a9a", tag: "To Vivienne, with love.", quote: ["It was no large matter of love,", "it was everything."] },
+  { key: "vivienne",  label: "Vivienne",  letter: "V", color: "#c98a9a", tag: "To Vivienne, with love.", quotes: [["It was no large matter of love,", "it was everything."], ["What is left after this?", "What can death loose in me", "after your embrace?"]] },
   { key: "augustine", label: "Augustine", letter: "A", color: "#7fb0c9", tag: "Our Boo." },
   { key: "evan",      label: "Evan",      letter: "E", color: "#86c98a", tag: "Wanted in every single day." },
   { key: "loki",      label: "Loki",      letter: "L", color: "#9a8ec9", tag: "In loving memory." },
   { key: "filou",     label: "Filou",     letter: "F", color: "#d9a86a", tag: "In loving memory." },
   { key: "maomao",    label: "Mao Mao",   letter: "M", color: "#69c9b8", tag: "The newest of us.", comingSoon: true },
-  { key: "marc",      label: "Marc",      letter: "Y", color: "#8fa9c0", tag: "Who I'm becoming.", quote: [
+  { key: "marc",      label: "Marc",      letter: "Y", color: "#8fa9c0", tag: "Who I'm becoming.", quotes: [[
     "We all begin with good intent",
     "When love was raw and young",
     "We believe that we could change ourselves",
@@ -15,7 +15,7 @@ const AREAS = [
     "Time always reveals",
     "In the lonely light of morning",
     "In the wound that would not heal",
-  ] },
+  ]] },
 ];
 const AREA_BY_KEY = Object.fromEntries(AREAS.map(a => [a.key, a]));
 const STORE_KEY = "vivienne_curation_v1";
@@ -56,7 +56,7 @@ const VIEW = document.getElementById("view");
 
 /* per-section montage words — { open, captions[], close }. Captions unfold across the photos. */
 const AREA_MONTAGE = {
-  vivienne:  { open: ["For Vivienne"], captions: [], close: ["Whatever comes,", "I'm not going anywhere."] },
+  vivienne:  { open: ["For Vivienne"], captions: [], close: ["Whatever comes,", "I'm not going anywhere."], songs: [{ title: "I Believe — Stevie Wonder", ids: ["D4LsZjv8Uao", "VfDZNwJ3jVU", "H--_-gPX3Nw"] }] },
   augustine: {
     open: ["Augustine Che Bittner", "our Boo"],
     captions: [
@@ -87,7 +87,7 @@ const AREA_MONTAGE = {
       ["We searched for months — every door, every street,", "walking in shifts, you three months along with Evan,", "calling and calling his name."],
     ],
     close: ["We never found him.", "We miss him terribly —", "and you, Vivienne, most of all."],
-    songs: [{ title: "Daydreamin' — Lupe Fiasco", ids: ["7XOAStfv-v0", "3xkP8h5Cwpk"] }],
+    songs: [{ title: "Gangnam Style — PSY", ids: ["9bZkp7q19f0", "CH1XGdu-hzQ"] }],
   },
   filou: {
     open: ["Filou", "my orange shadow"],
@@ -102,7 +102,7 @@ const AREA_MONTAGE = {
       ["He slept on my shoulder almost every night", "for thirteen of his fifteen years."],
     ],
     close: ["Last summer he died in my arms,", "after a short illness.", "Loved beyond measure."],
-    songs: [{ title: "Ghost — Indigo Girls", ids: ["KwbeHSI-3Co", "zrGQNIysc0I"] }],
+    songs: [{ title: "Seen Enough — Dryer", ids: ["gKgTSAMA04I", "cXTNS18dx7Q"] }],
   },
   maomao:    { open: ["Mao Mao —", "the newest of us."], captions: [], close: ["Welcome home, little one."] },
   marc: {
@@ -118,10 +118,7 @@ const AREA_MONTAGE = {
       ["I'm an alcoholic.", "I'm sober now,", "and I fight to stay that way, every day."],
     ],
     close: ["Not the man I was —", "the man I'm becoming.", "For you. For them. For good."],
-    songs: [
-      { title: "Fallen — Sarah McLachlan", ids: ["Jqps9ZdMxs0", "5xyGOeG8vdo"] },
-      { title: "Skeleton Key — Dessa", ids: ["B-elJDC8N7I", "OS8BLqDbY5U"] },
-    ],
+    songs: [{ title: "While My Guitar Gently Weeps — Prince & friends", ids: ["6SFNW5F8K9Y", "3MC6s9HHonU"] }],
   },
 };
 function areaPhotos(key) {
@@ -171,7 +168,7 @@ function renderSection(key) {
         ${all.length ? `<button class="btn montage-cta" id="playSection">▶ Play ${a.label}'s montage</button>` : ""}
         ${hiddenN ? `<button class="linkbtn" id="toggleHidden">${showHidden ? "hide near-duplicates" : `show hidden (${hiddenN})`}</button>` : ""}
       </header>
-      ${a.quote ? `<blockquote class="quote">${a.quote.map(l => `<span>${l}</span>`).join("")}</blockquote>` : ""}
+      ${(a.quotes || []).map(q => `<blockquote class="quote">${q.map(l => `<span>${l}</span>`).join("")}</blockquote>`).join("")}
       ${list.length
         ? `<div class="grid">${list.map(cardHTML).join("")}</div>`
         : a.comingSoon
@@ -311,10 +308,17 @@ function renderEnterMenu() {
   menu.innerHTML = chips.join("");
   menu.querySelectorAll(".chip").forEach(b => b.onclick = () => {
     const k = b.dataset.m;
-    if (k === "vivienne") window.Montage.play();
+    if (k === "vivienne") window.Montage.play(null, AREA_MONTAGE.vivienne.songs);
     else window.Montage.play(buildAreaSlides(k), (AREA_MONTAGE[k] || {}).songs);
   });
 }
+window.MAIN_SONGS = AREA_MONTAGE.vivienne.songs;   // the begin/"whole story" button uses Vivienne's song
+window.ALL_SONGS = (function () {                  // unique pool of every section's song, for shuffle + next
+  const seen = new Set(), out = [];
+  Object.values(AREA_MONTAGE).forEach(m => (m.songs || []).forEach(s => { if (!seen.has(s.title)) { seen.add(s.title); out.push(s); } }));
+  return out;
+})();
+document.getElementById("musicNext").onclick = () => window.Music && window.Music.next();
 renderEnterMenu();
 
 /* ---------- init ---------- */

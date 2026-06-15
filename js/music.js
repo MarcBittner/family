@@ -68,14 +68,18 @@
     if (ytReady) { try { yt.playVideo(); } catch (_) { startCurrent(); } }
     else pending = true;
   }
-  function playList(tracks) {              // switch to a playlist (montage selection) — fades, randomized
-    LIST = (tracks && tracks.length) ? tracks : DEFAULT_TRACKS;
-    cand = 0; deadSongs = 0; playing = true;
-    idx = LIST.length > 1 ? Math.floor(Math.random() * LIST.length) : 0;   // rotate the starting song
+  function shuffle(a) { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+  function playList(startSongs) {          // start with the section's song, then a shuffled run of everything else
+    const all = (window.ALL_SONGS && window.ALL_SONGS.length) ? window.ALL_SONGS : DEFAULT_TRACKS;
+    const lead = (startSongs && startSongs.length) ? startSongs[0] : null;
+    const rest = shuffle(all.filter(t => !lead || t.title !== lead.title));
+    LIST = lead ? [lead, ...rest] : (rest.length ? rest : all);
+    cand = 0; deadSongs = 0; playing = true; idx = 0;
     updateBtn();
     if (!ytReady) { pending = true; return; }
     startCurrent();   // must run inside the click gesture or the browser blocks audio
   }
+  function next() { idx = (idx + 1) % LIST.length; cand = 0; deadSongs = 0; if (ytReady) startCurrent(); else pending = true; }
   function fadeOutThenStart() {            // gentle fade of the outgoing song before the new one
     if (!yt) { startCurrent(); return; }
     let v; try { v = yt.getVolume(); } catch (_) { v = VOL; }
@@ -114,5 +118,5 @@
       voices.forEach((v, i) => { v.o1.frequency.setTargetAtTime(c[i], ctx.currentTime, 1.2); v.o2.frequency.setTargetAtTime(c[i], ctx.currentTime, 1.2); }); }, 8000);
   }
 
-  window.Music = { play, playList, pause, toggle, setVolume, DEFAULT_TRACKS, get playing() { return playing; } };
+  window.Music = { play, playList, next, pause, toggle, setVolume, DEFAULT_TRACKS, get playing() { return playing; } };
 })();
