@@ -5,7 +5,6 @@ docs/spec/untracked/
 montage/labeled/
 montage/lsheets/
 montage/sheets/
-montage/full/
 montage/*.png
 montage/*.jsonl
 .DS_Store
