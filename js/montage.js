@@ -41,7 +41,7 @@ const skipEl  = document.getElementById("mskip");
 let idx = 0, timer = null, front = layerA, back = layerB, running = false;
 
 function paint(slide, layer) {
-  layer.style.setProperty("--img", `url("${slide.img}")`);
+  layer.style.backgroundImage = `url("${slide.img}")`;
   layer.classList.remove("kbon");
   void layer.offsetWidth;
   layer.classList.add("kbon");
@@ -63,7 +63,7 @@ function step() {
   timer = setTimeout(idx >= slides.length ? end : step, SLIDE_MS);
 }
 function play(custom, songs) {
-  if (running) return;
+  clearTimeout(timer);
   slides = (custom && custom.length) ? custom : SLIDES;
   running = true;
   enterEl.classList.add("gone");

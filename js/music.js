@@ -63,12 +63,24 @@
   }
   function nextSong() { idx = (idx + 1) % LIST.length; cand = 0; deadSongs = 0; if (playing && ytReady) startCurrent(); }
 
-  function play() { if (playing) return; playing = true; if (ytReady) startCurrent(); else pending = true; updateBtn(); }
-  function playList(tracks) {
+  function play() {                       // resume / first start (nav toggle)
+    playing = true; updateBtn();
+    if (ytReady) { try { yt.playVideo(); } catch (_) { startCurrent(); } }
+    else pending = true;
+  }
+  function playList(tracks) {              // switch to a playlist (montage selection) — fades, randomized
     LIST = (tracks && tracks.length) ? tracks : DEFAULT_TRACKS;
-    idx = 0; cand = 0; deadSongs = 0; playing = true;
-    if (ytReady) startCurrent(); else pending = true;
+    cand = 0; deadSongs = 0; playing = true;
+    idx = LIST.length > 1 ? Math.floor(Math.random() * LIST.length) : 0;   // rotate the starting song
     updateBtn();
+    if (!ytReady) { pending = true; return; }
+    fadeOutThenStart();
+  }
+  function fadeOutThenStart() {            // gentle fade of the outgoing song before the new one
+    if (!yt) { startCurrent(); return; }
+    let v; try { v = yt.getVolume(); } catch (_) { v = VOL; }
+    if (v == null) v = VOL;
+    const t = setInterval(() => { v -= 9; try { yt.setVolume(Math.max(0, v)); } catch (_) {} if (v <= 0) { clearInterval(t); startCurrent(); } }, 55);
   }
   function pause() { playing = false; try { yt && yt.pauseVideo(); } catch (_) {} if (usingSynth) stopSynth(); updateBtn(); }
   function toggle() { playing ? pause() : play(); }
