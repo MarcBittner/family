@@ -61,8 +61,8 @@ const AREA_MONTAGE = {
     open: ["Augustine Che Bittner", "our Boo"],
     captions: [
       ["Our first son.", "The one who made us a family."],
-      ["He almost left us once —", "a sunflower seed, a frightening day in China.", "We have never forgotten how close it was."],
-      ["So every ordinary day with him", "feels like a gift we were handed twice."],
+      ["He is precious beyond words,", "and reminds us every day", "that tomorrow is not promised."],
+      ["So every ordinary day with him", "feels like a gift."],
       ["He doesn't have many words yet.", "He has his own way of being here —", "careful, particular, entirely himself."],
       ["He climbs to the highest thing he can find", "and jumps. Fearless. Again and again."],
       ["Loves animals. Loves the iPad too much.", "Eats exactly what he wants, and nothing else."],
