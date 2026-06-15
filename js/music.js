@@ -34,7 +34,7 @@
         },
         onError: () => tryNextCandidate(),
         onStateChange: (e) => {
-          if (e.data === YT.PlayerState.PLAYING) clearTimeout(watch);
+          if (e.data === YT.PlayerState.PLAYING) { clearTimeout(watch); usingSynth = false; stopSynth(); }   // real song wins → kill synth
           if (e.data === YT.PlayerState.ENDED) nextSong();
         },
       },
