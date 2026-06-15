@@ -1,6 +1,6 @@
 /* ===== To Vivienne, With Love — nav router + sections + curation ===== */
 const AREAS = [
-  { key: "vivienne",  label: "Vivienne",  letter: "V", color: "#c98a9a", tag: "To Vivienne, with love." },
+  { key: "vivienne",  label: "Vivienne",  letter: "V", color: "#c98a9a", tag: "To Vivienne, with love.", quote: ["It was no large matter of love,", "it was everything."] },
   { key: "augustine", label: "Augustine", letter: "A", color: "#7fb0c9", tag: "Our Boo." },
   { key: "evan",      label: "Evan",      letter: "E", color: "#86c98a", tag: "Wanted in every single day." },
   { key: "loki",      label: "Loki",      letter: "L", color: "#9a8ec9", tag: "In loving memory." },
