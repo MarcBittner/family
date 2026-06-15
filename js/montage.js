@@ -33,10 +33,10 @@ const skipEl  = document.getElementById("mskip");
 let idx = 0, timer = null, front = layerA, back = layerB, running = false;
 
 function paint(slide, layer) {
-  layer.style.backgroundImage = `url("${slide.img}")`;
-  layer.classList.remove("kb1", "kb2");
+  layer.style.setProperty("--img", `url("${slide.img}")`);
+  layer.classList.remove("kbon");
   void layer.offsetWidth;
-  layer.classList.add(idx % 2 ? "kb1" : "kb2");
+  layer.classList.add("kbon");
 }
 function showText(slide) {
   textEl.classList.remove("show");

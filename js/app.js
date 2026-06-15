@@ -277,5 +277,23 @@ window.addEventListener("hashchange", route);
 document.getElementById("musicToggle").onclick = () => window.Music && window.Music.toggle();
 document.getElementById("burger").onclick = () => document.getElementById("navLinks").classList.toggle("open");
 
+/* ---------- cover montage selector ---------- */
+function renderEnterMenu() {
+  const menu = document.getElementById("enterMenu");
+  if (!menu) return;
+  const chips = [`<button class="chip" data-m="vivienne">Vivienne</button>`];
+  AREAS.forEach(a => {
+    if (a.key === "vivienne" || a.key === "maomao") return;
+    if (photos.some(p => p.area === a.key && !p.hidden)) chips.push(`<button class="chip" data-m="${a.key}">${a.label}</button>`);
+  });
+  menu.innerHTML = chips.join("");
+  menu.querySelectorAll(".chip").forEach(b => b.onclick = () => {
+    const k = b.dataset.m;
+    if (k === "vivienne") window.Montage.play();
+    else window.Montage.play(buildAreaSlides(k), (AREA_MONTAGE[k] || {}).songs);
+  });
+}
+renderEnterMenu();
+
 /* ---------- init ---------- */
 route();
