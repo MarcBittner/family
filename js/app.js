@@ -6,7 +6,16 @@ const AREAS = [
   { key: "loki",      label: "Loki",      letter: "L", color: "#9a8ec9", tag: "In loving memory." },
   { key: "filou",     label: "Filou",     letter: "F", color: "#d9a86a", tag: "In loving memory." },
   { key: "maomao",    label: "Mao Mao",   letter: "M", color: "#69c9b8", tag: "The newest of us.", comingSoon: true },
-  { key: "marc",      label: "Marc",      letter: "Y", color: "#8fa9c0", tag: "Who I'm becoming." },
+  { key: "marc",      label: "Marc",      letter: "Y", color: "#8fa9c0", tag: "Who I'm becoming.", quote: [
+    "We all begin with good intent",
+    "When love was raw and young",
+    "We believe that we could change ourselves",
+    "The past can be undone",
+    "But we carry on our back the burden",
+    "Time always reveals",
+    "In the lonely light of morning",
+    "In the wound that would not heal",
+  ] },
 ];
 const AREA_BY_KEY = Object.fromEntries(AREAS.map(a => [a.key, a]));
 const STORE_KEY = "vivienne_curation_v1";
@@ -162,6 +171,7 @@ function renderSection(key) {
         ${all.length ? `<button class="btn montage-cta" id="playSection">▶ Play ${a.label}'s montage</button>` : ""}
         ${hiddenN ? `<button class="linkbtn" id="toggleHidden">${showHidden ? "hide near-duplicates" : `show hidden (${hiddenN})`}</button>` : ""}
       </header>
+      ${a.quote ? `<blockquote class="quote">${a.quote.map(l => `<span>${l}</span>`).join("")}</blockquote>` : ""}
       ${list.length
         ? `<div class="grid">${list.map(cardHTML).join("")}</div>`
         : a.comingSoon
