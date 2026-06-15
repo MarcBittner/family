@@ -60,7 +60,22 @@ const AREA_MONTAGE = {
     close: ["Augustine.", "Precious beyond all of it.", "Ours."],
   },
   evan:      { open: ["Evan."], captions: [], close: ["Wanted, every single day."] },
-  loki:      { open: ["Loki", "—", "forever ours."], captions: [], close: ["Rest easy, sweet boy."] },
+  loki: {
+    open: ["Loki", "the sweetest heart"],
+    captions: [
+      ["The kindest, sweetest heart", "of any cat we ever knew."],
+      ["Small and round —", "though you always swore", "he was just big-boned."],
+      ["Not as clever as his brother,", "but braver of heart —", "whatever Filou learned, Loki learned next."],
+      ["He loved food more than anything,", "but wanted so badly to be good"],
+      ["that he'd guard the pizza without a bite,", "waiting for his 'Loki piece.'", "(Once or twice, a whole chicken still vanished.)"],
+      ["Stubborn to the bone.", "He'd miss the same jump a hundred times,", "and try it a hundred and one."],
+      ["He loved the sun, and his family,", "and he watched over Boo", "when Boo was small."],
+      ["And every night, for years,", "he slept curled on your head."],
+      ["Last March, at Lake Arrowhead,", "a door was left open.", "By morning, he was gone."],
+      ["We searched for months — every door, every street,", "walking in shifts, you three months along with Evan,", "calling and calling his name."],
+    ],
+    close: ["We never found him.", "We miss him terribly —", "and you, Vivienne, most of all."],
+  },
   filou: {
     open: ["Filou", "my orange shadow"],
     captions: [
