@@ -71,7 +71,16 @@ const AREA_MONTAGE = {
     close: ["Augustine.", "Precious beyond all of it.", "Ours."],
     songs: [{ title: "Hallelujah — Pentatonix", ids: ["LRP8d7hhpoQ", "9UyYjXVnQTE"] }],
   },
-  evan:      { open: ["Evan."], captions: [], close: ["Wanted, every single day."], songs: [{ title: "Pretty Good Year — Tori Amos", ids: ["xr8auZq-Xn8", "abvktnzBUkU", "qODQB8kp9C4"] }] },
+  evan:      {
+    open: ["Evan."],
+    captions: [
+      ["Our youngest.", "So new to all of us."],
+      ["You are wanted —", "in every single day."],
+      ["I can't wait", "to know who you become."],
+    ],
+    close: ["Loved, already.", "Completely."],
+    songs: [{ title: "Pretty Good Year — Tori Amos", ids: ["xr8auZq-Xn8", "abvktnzBUkU", "qODQB8kp9C4"] }],
+  },
   loki: {
     open: ["Loki", "the sweetest heart"],
     captions: [
@@ -134,7 +143,7 @@ function buildAreaSlides(key) {
   if (favs.length >= 6) pics = favs;                      // prefer keepers once you've starred enough
   const caps = (m.captions || []).slice();
   const pins = m.pins || {};                              // photoId -> caption pinned to that exact photo
-  const MAX = Math.max(36, caps.length * 3 + 2);
+  const MAX = Math.max(14, caps.length * 2 + 2);   // keep text dense — a caption roughly every other photo
   if (pics.length > MAX) {
     const stride = pics.length / MAX;
     pics = Array.from({ length: MAX }, (_, i) => pics[Math.floor(i * stride)]);
