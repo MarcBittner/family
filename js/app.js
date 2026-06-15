@@ -98,8 +98,17 @@ const AREA_MONTAGE = {
   maomao:    { open: ["Mao Mao —", "the newest of us."], captions: [], close: ["Welcome home, little one."] },
   marc: {
     open: ["Marc"],
-    captions: [],
-    close: ["Still here.", "Still trying.", "Still becoming."],
+    captions: [
+      ["I didn't get an easy start —", "a hard childhood, a guarded life."],
+      ["I was good at the things", "that don't require people:", "books, business, getting by alone."],
+      ["For years, the only things I loved", "were a couple of cats."],
+      ["Then I met you,", "and the whole world changed color."],
+      ["I'm not always easy to live with.", "I don't always know how to show what I feel.", "I'm still learning to be good to the people I love."],
+      ["But you are my sun and my moon.", "You showed me a life worth living."],
+      ["I love our boys more than my own breath —", "and I want to be the father,", "the husband, they deserve."],
+      ["I'm an alcoholic.", "I'm sober now,", "and I fight to stay that way, every day."],
+    ],
+    close: ["Not the man I was —", "the man I'm becoming.", "For you. For them. For good."],
     songs: [
       { title: "Fallen — Sarah McLachlan", ids: ["Jqps9ZdMxs0", "5xyGOeG8vdo"] },
       { title: "Skeleton Key — Dessa", ids: ["B-elJDC8N7I", "OS8BLqDbY5U"] },
