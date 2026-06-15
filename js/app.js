@@ -5,7 +5,7 @@ const AREAS = [
   { key: "evan",      label: "Evan",      letter: "E", color: "#86c98a", tag: "Wanted in every single day." },
   { key: "loki",      label: "Loki",      letter: "L", color: "#9a8ec9", tag: "In loving memory." },
   { key: "filou",     label: "Filou",     letter: "F", color: "#d9a86a", tag: "In loving memory." },
-  { key: "maomao",    label: "Mao Mao",   letter: "M", color: "#69c9b8", tag: "The newest of us." },
+  { key: "maomao",    label: "Mao Mao",   letter: "M", color: "#69c9b8", tag: "The newest of us.", comingSoon: true },
   { key: "marc",      label: "Marc",      letter: "Y", color: "#8fa9c0", tag: "Who I'm becoming." },
 ];
 const AREA_BY_KEY = Object.fromEntries(AREAS.map(a => [a.key, a]));
@@ -143,7 +143,9 @@ function renderSection(key) {
       </header>
       ${list.length
         ? `<div class="grid">${list.map(cardHTML).join("")}</div>`
-        : `<div class="empty">
+        : a.comingSoon
+          ? `<div class="empty"><p class="coming__big">Coming soon</p><p>${a.label} is on the way.</p></div>`
+          : `<div class="empty">
              <p>No photos filed under <strong>${a.label}</strong> yet.</p>
              <p>Open the <a href="#gallery">Gallery</a> and tap <b>${a.letter}</b> on the photos that belong here — they'll appear in this section.</p>
            </div>`}

@@ -76,6 +76,7 @@ body.on-montage .view{display:none}
 .card.dup:hover{opacity:1}
 .card__dup{position:absolute;top:4px;right:5px;font-size:.55rem;background:rgba(0,0,0,.6);color:#cbb;padding:1px 5px;border-radius:4px;letter-spacing:.06em}
 .empty{text-align:center;color:#9a9099;padding:3rem 1rem;line-height:1.9}
+.coming__big{font-family:"Cormorant Garamond",serif;font-style:italic;font-size:clamp(2rem,5vw,3.2rem);color:var(--gold);margin-bottom:.4rem}
 .empty a{color:var(--gold)}
 
 /* gallery controls */
