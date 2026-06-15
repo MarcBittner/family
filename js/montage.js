@@ -69,7 +69,7 @@ function play(custom, songs) {
   enterEl.classList.add("gone");
   stage.classList.add("playing");
   document.body.classList.remove("montage-done");
-  if (window.Music) { if (songs && songs.length) window.Music.playList(songs); else window.Music.play(); }
+  if (window.Music) window.Music.playList(songs);   // always switch to the right playlist (default if none)
   idx = 0; front = layerA; back = layerB; step();
 }
 function end() {

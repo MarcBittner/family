@@ -49,7 +49,7 @@
       if (want === loadedId) yt.playVideo();
       yt.setVolume(0); fadeYT(VOL); label(); updateBtn();
       clearTimeout(watch);
-      watch = setTimeout(() => { try { if (yt.getPlayerState() !== 1) synthStart(); } catch (_) { synthStart(); } }, 3500);
+      watch = setTimeout(() => { try { const st = yt.getPlayerState(); if (st !== 1 && st !== 3) synthStart(); } catch (_) { synthStart(); } }, 7000);
     } catch (_) { synthStart(); }
   }
   function fadeYT(to) { let v = 0; const t = setInterval(() => { v = Math.min(to, v + 4); try { yt.setVolume(v); } catch (_) {} if (v >= to) clearInterval(t); }, 120); }
@@ -74,7 +74,7 @@
     idx = LIST.length > 1 ? Math.floor(Math.random() * LIST.length) : 0;   // rotate the starting song
     updateBtn();
     if (!ytReady) { pending = true; return; }
-    fadeOutThenStart();
+    startCurrent();   // must run inside the click gesture or the browser blocks audio
   }
   function fadeOutThenStart() {            // gentle fade of the outgoing song before the new one
     if (!yt) { startCurrent(); return; }
