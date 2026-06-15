@@ -54,14 +54,14 @@ function step() {
   idx++;
   timer = setTimeout(idx >= slides.length ? end : step, SLIDE_MS);
 }
-function play(custom) {
+function play(custom, songs) {
   if (running) return;
   slides = (custom && custom.length) ? custom : SLIDES;
   running = true;
   enterEl.classList.add("gone");
   stage.classList.add("playing");
   document.body.classList.remove("montage-done");
-  if (window.Music) window.Music.play();
+  if (window.Music) { if (songs && songs.length) window.Music.playList(songs); else window.Music.play(); }
   idx = 0; front = layerA; back = layerB; step();
 }
 function end() {

@@ -6,6 +6,7 @@ const AREAS = [
   { key: "loki",      label: "Loki",      letter: "L", color: "#9a8ec9", tag: "In loving memory." },
   { key: "filou",     label: "Filou",     letter: "F", color: "#d9a86a", tag: "In loving memory." },
   { key: "maomao",    label: "Mao Mao",   letter: "M", color: "#69c9b8", tag: "The newest of us." },
+  { key: "marc",      label: "Marc",      letter: "Y", color: "#8fa9c0", tag: "Who I'm becoming." },
 ];
 const AREA_BY_KEY = Object.fromEntries(AREAS.map(a => [a.key, a]));
 const STORE_KEY = "vivienne_curation_v1";
@@ -30,9 +31,10 @@ function cardHTML(p) {
     `<button class="abtn ${p.area === ar.key ? "sel" : ""}" data-a="${ar.key}"
        style="${p.area === ar.key ? `background:${ar.color};border-color:${ar.color}` : ""}"
        title="${ar.label}">${ar.letter}</button>`).join("");
-  return `<div class="card ${p.fav ? "kept" : ""}" data-id="${p.id}">
+  return `<div class="card ${p.fav ? "kept" : ""} ${p.hidden ? "dup" : ""}" data-id="${p.id}">
     <img src="${p.src}" alt="${p.id}" loading="lazy" />
     <span class="card__id">${p.id}</span>
+    ${p.hidden ? '<span class="card__dup">similar</span>' : ""}
     ${p.kind === "video" ? '<span class="card__vid">▶</span>' : ""}
     ${a ? `<span class="card__tag" style="background:${a.color}">${a.label}</span>` : ""}
     <button class="card__fav ${p.fav ? "on" : ""}" data-fav title="keep">★</button>
@@ -58,8 +60,9 @@ const AREA_MONTAGE = {
       ["A tiny version of me —", "same face, same wiring —", "and I love every bit of it."],
     ],
     close: ["Augustine.", "Precious beyond all of it.", "Ours."],
+    songs: [{ title: "Hallelujah — Pentatonix", ids: ["LRP8d7hhpoQ", "9UyYjXVnQTE"] }],
   },
-  evan:      { open: ["Evan."], captions: [], close: ["Wanted, every single day."] },
+  evan:      { open: ["Evan."], captions: [], close: ["Wanted, every single day."], songs: [{ title: "Pretty Good Year — Tori Amos", ids: ["xr8auZq-Xn8", "abvktnzBUkU", "qODQB8kp9C4"] }] },
   loki: {
     open: ["Loki", "the sweetest heart"],
     captions: [
@@ -75,6 +78,7 @@ const AREA_MONTAGE = {
       ["We searched for months — every door, every street,", "walking in shifts, you three months along with Evan,", "calling and calling his name."],
     ],
     close: ["We never found him.", "We miss him terribly —", "and you, Vivienne, most of all."],
+    songs: [{ title: "Daydreamin' — Lupe Fiasco", ids: ["7XOAStfv-v0", "3xkP8h5Cwpk"] }],
   },
   filou: {
     open: ["Filou", "my orange shadow"],
@@ -89,12 +93,22 @@ const AREA_MONTAGE = {
       ["He slept on my shoulder almost every night", "for thirteen of his fifteen years."],
     ],
     close: ["Last summer he died in my arms,", "after a short illness.", "Loved beyond measure."],
+    songs: [{ title: "Ghost — Indigo Girls", ids: ["KwbeHSI-3Co", "zrGQNIysc0I"] }],
   },
   maomao:    { open: ["Mao Mao —", "the newest of us."], captions: [], close: ["Welcome home, little one."] },
+  marc: {
+    open: ["Marc"],
+    captions: [],
+    close: ["Still here.", "Still trying.", "Still becoming."],
+    songs: [
+      { title: "Fallen — Sarah McLachlan", ids: ["Jqps9ZdMxs0", "5xyGOeG8vdo"] },
+      { title: "Skeleton Key — Dessa", ids: ["B-elJDC8N7I", "OS8BLqDbY5U"] },
+    ],
+  },
 };
 function buildAreaSlides(key) {
   const m = AREA_MONTAGE[key] || { open: [AREA_BY_KEY[key].label], captions: [], close: [] };
-  let pics = photos.filter(p => p.area === key);
+  let pics = photos.filter(p => p.area === key && !p.hidden);   // montages use the keepers only
   if (!pics.length) return null;
   const favs = pics.filter(p => p.fav);
   if (favs.length >= 6) pics = favs;                      // prefer keepers once you've starred enough
@@ -115,14 +129,17 @@ function buildAreaSlides(key) {
 
 function renderSection(key) {
   const a = AREA_BY_KEY[key];
-  const list = photos.filter(p => p.area === key);
+  const all = photos.filter(p => p.area === key);
+  const hiddenN = all.filter(p => p.hidden).length;
+  const list = all.filter(p => showHidden || !p.hidden);
   VIEW.innerHTML = `
     <section class="section">
       <header class="section__head">
         <h2 class="section__title">${a.label}</h2>
         <p class="section__tag">${a.tag}</p>
-        <p class="section__count">${list.length} photo${list.length === 1 ? "" : "s"}</p>
-        ${list.length ? `<button class="btn montage-cta" id="playSection">▶ Play ${a.label}'s montage</button>` : ""}
+        <p class="section__count">${list.length} photo${list.length === 1 ? "" : "s"}${hiddenN ? ` · ${hiddenN} near-duplicate${hiddenN === 1 ? "" : "s"} hidden` : ""}</p>
+        ${all.length ? `<button class="btn montage-cta" id="playSection">▶ Play ${a.label}'s montage</button>` : ""}
+        ${hiddenN ? `<button class="linkbtn" id="toggleHidden">${showHidden ? "hide near-duplicates" : `show hidden (${hiddenN})`}</button>` : ""}
       </header>
       ${list.length
         ? `<div class="grid">${list.map(cardHTML).join("")}</div>`
@@ -132,10 +149,12 @@ function renderSection(key) {
            </div>`}
     </section>`;
   const ps = document.getElementById("playSection");
-  if (ps) ps.onclick = () => window.Montage.play(buildAreaSlides(key));
+  if (ps) ps.onclick = () => window.Montage.play(buildAreaSlides(key), (AREA_MONTAGE[key] || {}).songs);
+  const th = document.getElementById("toggleHidden");
+  if (th) th.onclick = () => { showHidden = !showHidden; renderSection(key); };
 }
 
-let filterArea = "all", onlyFav = false, onlyUnsorted = false;
+let filterArea = "all", onlyFav = false, onlyUnsorted = false, showHidden = false;
 function renderGallery() {
   const counts = { all: photos.length, unsorted: 0 };
   AREAS.forEach(a => (counts[a.key] = 0));
@@ -145,6 +164,7 @@ function renderGallery() {
        ${color ? `<span class="dot" style="background:${color}"></span>` : ""}${label}
        <span class="n">${counts[k] ?? 0}</span></button>`;
   const vis = photos.filter(p => {
+    if (!showHidden && p.hidden) return false;
     if (onlyFav && !p.fav) return false;
     if (onlyUnsorted && p.area) return false;
     if (filterArea === "all") return true;
@@ -163,6 +183,7 @@ function renderGallery() {
       <div class="gactions">
         <label class="chk"><input type="checkbox" id="onlyFav" ${onlyFav ? "checked" : ""}/> only ★</label>
         <label class="chk"><input type="checkbox" id="onlyUnsorted" ${onlyUnsorted ? "checked" : ""}/> only unsorted</label>
+        <label class="chk"><input type="checkbox" id="showHiddenChk" ${showHidden ? "checked" : ""}/> show near-duplicates</label>
         <span class="spacer"></span>
         <span class="counts">${vis.length} shown · ${photos.filter(p => p.fav).length} kept ★</span>
         <button class="btn" id="exportBtn">Export my picks</button>
@@ -171,6 +192,7 @@ function renderGallery() {
     </section>`;
   document.getElementById("onlyFav").onchange = e => { onlyFav = e.target.checked; renderGallery(); };
   document.getElementById("onlyUnsorted").onchange = e => { onlyUnsorted = e.target.checked; renderGallery(); };
+  document.getElementById("showHiddenChk").onchange = e => { showHidden = e.target.checked; renderGallery(); };
   document.getElementById("exportBtn").onclick = openExport;
   VIEW.querySelectorAll(".fbtn").forEach(b => (b.onclick = () => { filterArea = b.dataset.f; renderGallery(); }));
 }

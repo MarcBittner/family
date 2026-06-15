@@ -1,8 +1,9 @@
-/* ===== Music — streams the real songs via the YouTube IFrame API ===== *
- * Each song has fallback uploads; if one can't embed, it tries the next,
- * then the next song, and only synthesizes a bed if YouTube fails entirely. */
+/* ===== Music — streams real songs via the YouTube IFrame API ===== *
+ * The active playlist (LIST) defaults to the love-story set; each section
+ * montage swaps in its own playlist via Music.playList([...]). Each song has
+ * fallback uploads; a synth bed is the last resort if YouTube fails entirely. */
 (function () {
-  const TRACKS = [
+  const DEFAULT_TRACKS = [
     { title: "My Body Is a Cage — Peter Gabriel", ids: ["bJwiLFhVlCM", "dTZQ2IB_x7c", "SrstRzBSS6E"] },
     { title: "A Thousand Years — Christina Perri", ids: ["rtOvBOTyX00", "sYeRlr5xxfg", "NZGHXy1IAHM"] },
     { title: "My Immortal — Evanescence",          ids: ["5anLPw0Efmo", "A1mPY9z4kvQ", "ANbyXGc0z4U"] },
@@ -11,11 +12,10 @@
   const VOL = 65;
 
   let yt = null, ytReady = false, playing = false, pending = false;
-  let idx = 0, cand = 0, deadSongs = 0, usingSynth = false, loadedId = null, watch = null;
+  let LIST = DEFAULT_TRACKS, idx = 0, cand = 0, deadSongs = 0, usingSynth = false, loadedId = null, watch = null;
 
   const host = document.createElement("div");
   host.id = "ytplayer";
-  // MUST stay within the viewport or YouTube refuses to play; keep it tiny + nearly invisible.
   host.style.cssText = "position:fixed;right:2px;bottom:2px;width:2px;height:2px;opacity:.01;z-index:0;pointer-events:none;overflow:hidden";
   (document.body || document.documentElement).appendChild(host);
   const tag = document.createElement("script");
@@ -29,50 +29,55 @@
       events: {
         onReady: () => {
           ytReady = true; yt.setVolume(VOL);
-          try { yt.cueVideoById(TRACKS[0].ids[0]); loadedId = TRACKS[0].ids[0]; } catch (_) {}  // pre-buffer track 1
-          if (pending) { pending = false; startYT(); }
+          try { yt.cueVideoById(DEFAULT_TRACKS[0].ids[0]); loadedId = DEFAULT_TRACKS[0].ids[0]; } catch (_) {}
+          if (pending) { pending = false; startCurrent(); }
         },
         onError: () => tryNextCandidate(),
         onStateChange: (e) => {
-          if (e.data === YT.PlayerState.PLAYING) { clearTimeout(watch); }   // it's really playing → cancel fallback
+          if (e.data === YT.PlayerState.PLAYING) clearTimeout(watch);
           if (e.data === YT.PlayerState.ENDED) nextSong();
         },
       },
     });
   };
 
-  function startYT() {
+  function startCurrent() {
     try {
       usingSynth = false; stopSynth();
-      const want = TRACKS[idx].ids[cand];
+      const want = LIST[idx].ids[cand];
       if (want !== loadedId) { yt.loadVideoById(want); loadedId = want; } else { yt.playVideo(); }
       if (want === loadedId) yt.playVideo();
       yt.setVolume(0); fadeYT(VOL); label(); updateBtn();
       clearTimeout(watch);
-      watch = setTimeout(() => { try { if (yt.getPlayerState() !== 1) synthStart(); } catch (_) { synthStart(); } }, 3000);
+      watch = setTimeout(() => { try { if (yt.getPlayerState() !== 1) synthStart(); } catch (_) { synthStart(); } }, 3500);
     } catch (_) { synthStart(); }
   }
   function fadeYT(to) { let v = 0; const t = setInterval(() => { v = Math.min(to, v + 4); try { yt.setVolume(v); } catch (_) {} if (v >= to) clearInterval(t); }, 120); }
   function tryNextCandidate() {
     cand++;
-    if (cand < TRACKS[idx].ids.length) { if (playing) startYT(); return; }   // try another upload of same song
+    if (cand < LIST[idx].ids.length) { if (playing) startCurrent(); return; }
     cand = 0; deadSongs++;
-    if (deadSongs >= TRACKS.length) { synthStart(); return; }                 // every song blocked → ambient
-    idx = (idx + 1) % TRACKS.length;
-    if (playing) startYT();
+    if (deadSongs >= LIST.length) { synthStart(); return; }
+    idx = (idx + 1) % LIST.length;
+    if (playing) startCurrent();
   }
-  function nextSong() { idx = (idx + 1) % TRACKS.length; cand = 0; deadSongs = 0; if (playing && ytReady) startYT(); }
+  function nextSong() { idx = (idx + 1) % LIST.length; cand = 0; deadSongs = 0; if (playing && ytReady) startCurrent(); }
 
-  function play() { if (playing) return; playing = true; if (ytReady) startYT(); else pending = true; updateBtn(); }
+  function play() { if (playing) return; playing = true; if (ytReady) startCurrent(); else pending = true; updateBtn(); }
+  function playList(tracks) {
+    LIST = (tracks && tracks.length) ? tracks : DEFAULT_TRACKS;
+    idx = 0; cand = 0; deadSongs = 0; playing = true;
+    if (ytReady) startCurrent(); else pending = true;
+    updateBtn();
+  }
   function pause() { playing = false; try { yt && yt.pauseVideo(); } catch (_) {} if (usingSynth) stopSynth(); updateBtn(); }
   function toggle() { playing ? pause() : play(); }
   function setVolume(v) { try { yt && yt.setVolume(Math.round(v)); } catch (_) {} synthVol(v / 100); }
-  function selectTrack(i) { idx = i % TRACKS.length; cand = 0; deadSongs = 0; if (playing) startYT(); }
 
-  function label() { const el = document.getElementById("musicTrack"); if (el) el.textContent = TRACKS[idx].title; }
+  function label() { const el = document.getElementById("musicTrack"); if (el) el.textContent = LIST[idx].title; }
   function updateBtn() { const b = document.getElementById("musicToggle"); if (b) b.classList.toggle("on", playing); }
 
-  /* ---- synth fallback (only if YouTube is fully blocked) ---- */
+  /* ---- synth fallback ---- */
   let ctx, master, voices = [], chordIdx = 0;
   const CHORDS = [[110, 130.81, 164.81], [87.31, 110, 130.81], [98, 130.81, 164.81], [98, 123.47, 146.83]];
   function synthStart() {
@@ -97,5 +102,5 @@
       voices.forEach((v, i) => { v.o1.frequency.setTargetAtTime(c[i], ctx.currentTime, 1.2); v.o2.frequency.setTargetAtTime(c[i], ctx.currentTime, 1.2); }); }, 8000);
   }
 
-  window.Music = { play, pause, toggle, setVolume, selectTrack, TRACKS, get playing() { return playing; } };
+  window.Music = { play, playList, pause, toggle, setVolume, DEFAULT_TRACKS, get playing() { return playing; } };
 })();
