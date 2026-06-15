@@ -16,6 +16,7 @@ const SLIDES = [
   { img: "montage/full/0413.jpg",  lines: ["Home was never a place.", "It was you."] },
   { img: "montage/full/0742.jpg",  lines: ["And one day,", "you married me."] },
   { img: "montage/full/0741.jpg",  lines: ["Dressed up —", "but I only ever saw you."] },
+  { img: "montage/full/0018.jpg",  lines: ["Our home filled with more than us —", "first, the cats."] },
   { img: "montage/full/0488.jpg",  lines: ["You loved them like family —", "Loki most of all —", "because that's what they were."] },
   { img: "montage/full/0547.jpg",  lines: ["Then Augustine.", "I watched you become a mother,", "and loved you more than I knew I could."] },
   { img: "montage/full/0610.jpg",  lines: ["A family —", "the thing I want most", "in this world."] },
